@@ -1,0 +1,7 @@
+To_do.txt
+*.cmake
+CMakeFiles/
+CMakeCache.txt
+Makefile
+CardGame
+build/
