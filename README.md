@@ -1,4 +1,4 @@
-# CARD GAME
+# BJ GAME
 
 ### Release v1.0
 
