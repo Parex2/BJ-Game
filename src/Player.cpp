@@ -95,3 +95,13 @@ std::shared_ptr<Card> Player::remove_last(){
 std::shared_ptr<Card> Player::get_last(){
     return _hand.back();
 }
+
+void Player::set_base_bet(int bet){
+    if(bet > 0){
+        _base_bet = bet;
+    }
+}
+
+int Player::get_base_bet(){
+    return _base_bet;
+}

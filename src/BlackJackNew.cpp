@@ -35,6 +35,7 @@ void BlackJackNew::play() {
     for(int i = BJ::DEALER_INDEX + 1; i < _player_count + 1; ++i){
         std::string nickname;
         std::cout << "Enter nickname: ";
+        std::flush(std::cout);
         std::getline(std::cin, nickname);
         _players.at(i) = std::make_shared<Player>(nickname, i);
         _players.at(i)->set_points(BET_LIMIT::START_POINTS);
@@ -65,6 +66,7 @@ void BlackJackNew::play() {
         _first_draw(_deck);
         _print_first_hand();
         _ask_insurance();
+        _ask_split(_head->next);
         _players_draw(_deck);
         _dealer_draw(_head, _deck);
         _get_results();
@@ -131,7 +133,7 @@ void BlackJackNew::_first_draw(std::shared_ptr<Deck> deck){
         _count(token);
 
         token->bj = token->max_value == BJ::BLACK_JACK ? true : false;
-
+        _get_final_value(token);
         token = token->next;
 
     }
@@ -149,6 +151,7 @@ void BlackJackNew::_ask_bet(){
             std::string number;
             while(true){
                 std::cout << player->get_nickname() << " bet (available points: " << player->get_points() << "): ";
+                std::flush(std::cout);
                 std::getline(std::cin, number);
                 if(important::is_number(number)){
                     break;
@@ -161,6 +164,7 @@ void BlackJackNew::_ask_bet(){
             }else if(number_int > BET_LIMIT::MIN_BET){
                 player->set_bet(number_int);
                 player->add_points(0 - number_int);
+                player->set_base_bet(number_int);
                 _bets_on = true;
                 break;
             }
@@ -201,6 +205,7 @@ void BlackJackNew::_print_first_hand(){
         if(player->get_id() == BJ::DEALER_ID){
             std::cout << player->get_nickname() << std::endl;
             std::cout << "Hand: ";
+            std::flush(std::cout);
             player->get_card(0)->show();
             std::cout << std::endl;
             continue;
@@ -232,6 +237,7 @@ void BlackJackNew::_ask_insurance(){
     while(token){
         std::string action;
         std::cout << token->player->get_nickname() << " (y -> yes, n->no): ";
+        std::flush(std::cout);
         std::getline(std::cin, action);
         if(action == "y"){
             token->insurance = true;
@@ -256,12 +262,7 @@ void BlackJackNew::_players_draw(std::shared_ptr<Deck> deck){
             token = token->next;
             continue;
         }
-        if(token->player->get_hand_size() == 2){
-            if(token->player->get_card(0) == token->player->get_card(1)) {
-                _ask_split(token);
-                std::cout << "Split asked" << std::endl;
-            }
-        }
+        
         if(token->player->get_hand_size() == 1){
             token->player->add_card(deck->draw());
             _count(token);
@@ -274,6 +275,7 @@ void BlackJackNew::_players_draw(std::shared_ptr<Deck> deck){
             _print_total(token);
             std::string action;
             std::cout << "Choose action(d -> draw, p -> pass, dd -> double): ";
+            std::flush(std::cout);
             std::getline(std::cin, action);
             if(action == "d"){
                 token->player->add_card(deck->draw());
@@ -282,12 +284,21 @@ void BlackJackNew::_players_draw(std::shared_ptr<Deck> deck){
                 break;
             }else if(action == "dd" && token->player->get_hand_size() == 2){
                 if(token->parent){
-                    token->parent->player->add_points(0 - token->parent->player->get_bet());
-                    token->parent->player->set_bet(token->parent->player->get_bet() + token->parent->player->get_bet());
+                    if(token->parent->player->get_points() < token->parent->player->get_base_bet()){
+                        std::cout << "Not enough points! (Current points: " << token->parent->player->get_points() << ")" << std::endl;
+                        continue;
+                    }
+                    token->parent->player->add_points(0 - token->parent->player->get_base_bet());
+                    //token->player->set_bet(token->player->get_bet() + token->player->get_bet());
                 }else{
-                    token->player->add_points(0 - token->player->get_bet());
-                    token->player->set_bet(token->player->get_bet() + token->player->get_bet());
+                    if(token->player->get_points() < token->player->get_base_bet()){
+                        std::cout << "Not enough points! (Current points: " << token->player->get_points() << ")" << std::endl;
+                        continue;
+                    }
+                    token->player->add_points(0 - token->player->get_base_bet());
+                    //token->player->set_bet(token->player->get_bet() + token->player->get_bet());
                 }
+                token->player->set_bet(token->player->get_base_bet() + token->player->get_base_bet());
                 token->player->add_card(deck->draw());
                 _count(token);
                 break;
@@ -301,9 +312,13 @@ void BlackJackNew::_players_draw(std::shared_ptr<Deck> deck){
 }
 
 void BlackJackNew::_ask_split(std::shared_ptr<Token> token){
+    if(token->player->get_card(0)->get_figure() != token->player->get_card(1)->get_figure() || token->player->get_points() < token->player->get_bet()){
+        return;
+    }
     while(true){
         std::string action;
         std::cout << token->player->get_nickname() << " split(y->yes, n->no): ";
+        std::flush(std::cout);
         std::getline(std::cin, action);
         if(action == "y"){
             break;
@@ -313,14 +328,18 @@ void BlackJackNew::_ask_split(std::shared_ptr<Token> token){
     }
     std::shared_ptr<Player> new_player = std::make_shared<Player>(token->player->get_nickname(), token->player->get_id());
     new_player->add_card(token->player->remove_last());
+    new_player->set_bet(token->player->get_bet());
+    token->player->add_points(0 - token->player->get_bet());
+
 
     token->min_value = 0;
     token->max_value = 0;
 
     _count(token);
 
+    
     std::shared_ptr<Token> dst = _create_token(new_player);
-
+    
     if(!token->parent){
         dst->parent = token;
     }else{
@@ -328,16 +347,22 @@ void BlackJackNew::_ask_split(std::shared_ptr<Token> token){
     }
 
     _count(dst);
-
     _add_in_place(token, dst);
 
 }
 
 void BlackJackNew::_add_in_place(std::shared_ptr<Token> src, std::shared_ptr<Token> dst){
     std::shared_ptr<Token> next_token = src->next;
-    next_token->previous = dst;
-    dst->next = next_token;
-    dst->previous = src;
+    if(!next_token){
+        dst->previous = src;
+        src->next = dst;
+    }else{
+        next_token->previous = dst;
+        dst->next = next_token;
+        dst->previous = src;
+        src->next = dst;
+    }
+    
 }
 
 void BlackJackNew::_count(std::shared_ptr<Token> token){
@@ -347,6 +372,7 @@ void BlackJackNew::_count(std::shared_ptr<Token> token){
 
 void BlackJackNew::_print_total(std::shared_ptr<Token> token){
     std::cout << "Total: ";
+    std::flush(std::cout);
     if(token->max_value == token->min_value){
         std::cout << token->max_value << std::endl;
     }else if(token->max_value >= BJ::BUST){
@@ -470,8 +496,10 @@ void BlackJackNew::_print_results(){
 
         if(token->parent){
             std::cout << " (other hand): ";
+            std::flush(std::cout);
         }else{
             std::cout << ": ";
+            std::flush(std::cout);
         }
 
         switch(token->result){
@@ -532,3 +560,4 @@ void BlackJackNew::_print_dealer_hand(){
     std::cout << std::endl;
     std::cout << "Total: " << _head->final_value << std::endl;
 }
+

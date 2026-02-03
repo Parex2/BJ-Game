@@ -1,9 +1,15 @@
 cmake_minimum_required(VERSION 3.28)
 
+project(CardGame LANGUAGES C CXX)
+
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-project(CardGame)
+set(SQLite3_INCLUDE_DIR /usr/include)
+set(SQLite3_LIBRARY /usr/lib/x86_64-linux-gnu/libsqlite3.so)
+find_package(SQLite3 REQUIRED)
+
+
 
 add_executable(CardGame 
 	src/main.cpp
@@ -13,6 +19,8 @@ add_executable(CardGame
 	src/BlackJack.cpp
 	src/BlackJackNew.cpp
 )
+
+target_link_libraries(CardGame PRIVATE SQLite::SQLite3)
 
 include(FetchContent)
 

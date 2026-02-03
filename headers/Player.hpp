@@ -13,6 +13,7 @@ class Player : IDisplay {
     int _id {0};
     int _points {0};
     int _bet{-1};
+    int _base_bet{-1};
 
 
     public:
@@ -35,6 +36,8 @@ class Player : IDisplay {
     void add_points(int);
     void set_bet(int);
     int get_bet();
+    void set_base_bet(int);
+    int get_base_bet();
     std::shared_ptr<Card> remove_last();
     std::shared_ptr<Card> get_last();
     

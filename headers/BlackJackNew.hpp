@@ -4,6 +4,7 @@
 #include "Player.hpp"
 #include "important.hpp"
 #include <array>
+#include <fstream>
 
 class BlackJackNew : Game {
     struct Token {
@@ -30,6 +31,7 @@ class BlackJackNew : Game {
     std::array<std::shared_ptr<Player>, BJ::MAX_PLAYERS_WITH_DEALER> _players = {};
     std::shared_ptr<Deck> _deck;
     bool _bets_on {false};
+    
 
     std::shared_ptr<Token> _create_token(std::shared_ptr<Player>);
     void _add_token(std::shared_ptr<Token>);

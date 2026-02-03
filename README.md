@@ -1,5 +1,11 @@
 # BJ GAME
 
+### Release v1.0.1
+
+Points distribution for splits were corrected
+
+Segmentation fault during split is fixed
+
 ### Release v1.0
 
 Version v0.1 requires at least C++17 & cmake v3.28
@@ -18,4 +24,4 @@ Version v0.1 requires at least C++17 & cmake v3.28
 
 ## Atention
 
-I will be greatfull for any feedback :) !
+I will be greatfull for any feedback!
