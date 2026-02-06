@@ -18,7 +18,6 @@ add_executable(CardGame
 	src/Player.cpp
 	src/BlackJack.cpp
 	src/BlackJackNew.cpp
-	src/DataBase.cpp
 )
 
 target_link_libraries(CardGame PRIVATE SQLite::SQLite3)
