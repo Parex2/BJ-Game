@@ -21,7 +21,7 @@ void Deck::show() const{
 void Deck::create(){
     for(int i = static_cast<int>(DECK_RANGE::BEGIN_TYPE); i < static_cast<int>(DECK_RANGE::END_TYPE) + 1; ++i){
         for(int j = static_cast<int>(DECK_RANGE::BEGIN_FIGURE); j < static_cast<int>(DECK_RANGE::END_FIGURE) + 1; ++j){
-            _deck.push_back(std::make_unique<Card>(TYPE(i), FIGURE(j)));
+            _deck.push_back(std::make_shared<Card>(TYPE(i), FIGURE(j)));
         }
     }
 }

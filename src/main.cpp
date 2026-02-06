@@ -2,16 +2,8 @@
 #include "../headers/Player.hpp"
 #include "../headers/BlackJack.hpp"
 #include "../headers/BlackJackNew.hpp"
-#include <sqlite3.h>
+#include "../headers/DataBase.hpp"
 int main(){
-	//std::shared_ptr<sqlite3> db = std::make_shared<sqlite3>();
-	sqlite3* db = nullptr;
-
-	sqlite3_stmt* stmt = nullptr;
-
-	sqlite3_open("test.db", &db);
-	sqlite3_close(db);
-
 	std::string number;
 	while(true){
 		std::cout << "Enter player count: ";

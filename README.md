@@ -1,5 +1,11 @@
 # BJ GAME
 
+### Release v1.0.1.1
+
+In Deck.cpp vector card were created with std::make_unique instead of std::make_shared. Program works but there was unnesesary move constructor invoked.
+
+DataBase class added. No usage of this class yet implemented.
+
 ### Release v1.0.1
 
 Points distribution for splits were corrected
